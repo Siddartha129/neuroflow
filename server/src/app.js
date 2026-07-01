@@ -13,10 +13,18 @@ import { workspaceRoutes } from './routes/workspaceRoutes.js';
 
 export const app = express();
 
+const normalizeOrigin = (origin) => origin.replace(/\/+$/, '');
+
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || config.clientUrls.includes(origin)) {
+      const normalizedOrigin = origin ? normalizeOrigin(origin) : '';
+      const isAllowedOrigin =
+        !origin ||
+        config.clientUrls.includes(normalizedOrigin) ||
+        config.clientOriginPatterns.some((pattern) => pattern.test(normalizedOrigin));
+
+      if (isAllowedOrigin) {
         callback(null, true);
         return;
       }

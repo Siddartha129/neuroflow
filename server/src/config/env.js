@@ -10,13 +10,20 @@ const rootEnvPath = path.resolve(__dirname, '../../../.env');
 dotenv.config({ path: rootEnvPath });
 dotenv.config({ path: serverEnvPath, override: true });
 
+const normalizeOrigin = (url) => url.trim().replace(/\/+$/, '');
+
 export const config = {
   port: Number(process.env.PORT || 3001),
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
   clientUrls: (process.env.CLIENT_URLS || process.env.CLIENT_URL || 'http://localhost:5173')
     .split(',')
-    .map((url) => url.trim())
+    .map(normalizeOrigin)
     .filter(Boolean),
+  clientOriginPatterns: (process.env.CLIENT_ORIGIN_PATTERNS || '')
+    .split(',')
+    .map((pattern) => pattern.trim())
+    .filter(Boolean)
+    .map((pattern) => new RegExp(pattern)),
   mongoUri: process.env.MONGODB_URI || '',
   jwtSecret: process.env.JWT_SECRET || 'dev-neuroflow-secret',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
