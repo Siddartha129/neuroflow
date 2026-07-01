@@ -13,7 +13,19 @@ import { workspaceRoutes } from './routes/workspaceRoutes.js';
 
 export const app = express();
 
-app.use(cors({ origin: config.clientUrl, credentials: true }));
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || config.clientUrls.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS blocked origin: ${origin}`));
+    },
+    credentials: true
+  })
+);
 app.use(express.json({ limit: '2mb' }));
 
 app.use('/api/health', healthRoutes);
